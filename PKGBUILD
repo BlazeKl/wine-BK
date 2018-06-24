@@ -1,58 +1,42 @@
 # Maintainer: Pierre Franco <pierre dot franco at ensimag dot grenoble dash inp dot fr>
-# Based on wine-staging PKGBUILD
+# Based on wine-staging and wine-gaming-nine PKGBUILD
 # Modified by BlazeKl for personal use
 
 #Additional patches:
 # -Gallium Nine support
-# -Keybind patch reversion
-# -Wbemprox videocontroller query fix v2 (see https://bugs.winehq.org/show_bug.cgi?id=38879 )
 # -Steam patch, Crossover Hack version (see https://bugs.winehq.org/show_bug.cgi?id=39403 )
-# -Linked lists perfomances improvements
-# -Wine-PBA (disabled by default)
-# -glsl hack for The Darkness II black textures fix
+# -GLSL hack fix for The Darkness II black textures
 
-pkgname=wine-gaming-nine
-pkgver=3.10
+pkgname=wine-bk
+pkgver=3.11
 pkgrel=1
 
 _pkgbasever=${pkgver/rc/-rc}
 
 _stagingversion="$pkgver"
-_d3d9version="3.10"
-_pbarevision="8f20f0718a47e3773f0f3f30c475516378191c67"
+_d3d9version="3.11"
 
 _stagingdir="wine-staging-$_stagingversion"
 _d3d9dir="wine-d3d9-patches-wine-d3d9-$_d3d9version"
-_pbadir="wine-pba-$_pbarevision/patches"
 
 source=(
 	https://dl.winehq.org/wine/source/3.x/wine-$_pkgbasever.tar.xz
 	https://github.com/wine-staging/wine-staging/archive/v$_stagingversion.tar.gz
 	https://github.com/sarnex/wine-d3d9-patches/archive/wine-d3d9-$_d3d9version.tar.gz
-	https://github.com/acomminos/wine-pba/archive/$_pbarevision.tar.gz
 	harmony-fix.patch
 	30-win32-aliases.conf
 	wine-binfmt.conf
-	keybindings.patch
-	poe-fix.patch
 	steam.patch
-	wbemprox_query_v2.patch
-	wine-list.h-linked-list-cache-line-prefetching.patch
         glsl.patch
 )
 sha512sums=(
 	'SKIP'
 	'SKIP'
 	'SKIP'
-	'5ca7651d5e0b147f8d1d47ce6bf225cd89048f3987b8744a6ca30a56586240b210581e5502f99b0a2b7f161ba8b359c1bd7f2ed7c4ac1d54d5ee69dd90b00d0d'
-	'b86edf07bfc560f403fdfd5a71f97930ee2a4c3f76c92cc1a0dbb2e107be9db3bed3a727a0430d8a049583c63dd11f5d4567fb7aa69b193997c6da241acc4f2e'
-	'6e54ece7ec7022b3c9d94ad64bdf1017338da16c618966e8baf398e6f18f80f7b0576edf1d1da47ed77b96d577e4cbb2bb0156b0b11c183a0accf22654b0a2bb'
-	'bdde7ae015d8a98ba55e84b86dc05aca1d4f8de85be7e4bd6187054bfe4ac83b5a20538945b63fb073caab78022141e9545685e4e3698c97ff173cf30859e285'
-	'88a017239dd9a58735795e41a12a3480afe260d9747ab2997db26196bdb551cb7e7591596278a8c67c35343bd9f8bf0560f88d3dd10bfd65681f9d2c6c287c84'
-	'7d2bb6d6be62405111e7a573471edb3d8114b12844cdd2581af1a6c87940cf62104156d9c80090fb980f9009a0903d25fbe3cdb9a7efbe81c0ad64fe24937112'
-	'ca24cc86a74cc8af8e23a34da9231778f56a7e2cff215bb956898d73f6945410f0eaabae542a5fd68f83456fb8f56b60e0abe2a710f6b190a01f84817ab3676c'
-	'904a6d5578c75633f9c8293a939d4ff67627b85b0ffcc9b6c2af5280314c7670d52c1c0c441bb6231508337a12e72abb620ca5ac5da5d45ffaa8f25fdddbb43d'
-	'abeef97c54f3dbdb49b737a5966c8a435c9235a4c2c6da151503ea1c14fa1889a8f35a5f80daa6188d367298716f8a64db4714d19be5e1203dc43239431f7ed2'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
         'SKIP'
 )
 
@@ -133,12 +117,6 @@ conflicts=('wine' 'wine-wow64' 'wine-staging')
 makedepends=(${makedepends[@]} ${depends[@]})
 install=wine.install
 
-_pbaprepare() {
-  for _f in $(ls $_pbadir); do
-    patch -d $pkgname -Np1 < $_pbadir/$_f
-  done
-}
-
 prepare() {
   # Allow ccache to work
   mv wine-$_pkgbasever $pkgname
@@ -149,21 +127,13 @@ prepare() {
 
   patch -d $pkgname -Np1 < harmony-fix.patch
 
-  patch -d $pkgname -Np1 < poe-fix.patch
   patch -d $pkgname -Np1 < steam.patch
-  patch -d $pkgname -Np1 < wine-list.h-linked-list-cache-line-prefetching.patch
-  patch -d $pkgname -Np1 < wbemprox_query_v2.patch
   patch -d $pkgname -Np1 < glsl.patch
-
-  patch -d $pkgname -Np1 -R < keybindings.patch
 
   $_stagingdir/patches/patchinstall.sh DESTDIR=$pkgname --all
 
   patch -d $pkgname -Np1 < $_d3d9dir/staging-helper.patch
   patch -d $pkgname -Np1 < $_d3d9dir/wine-d3d9.patch
-
-  # Uncomment if you want wine-pba optimizations
-  _pbaprepare
 
   autoreconf -f "$pkgname"
 
