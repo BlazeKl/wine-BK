@@ -19,6 +19,7 @@ source=(
 	git+https://github.com/zfigura/wine.git#branch=esync
 	git+https://github.com/wine-staging/wine-staging.git#commit=91b1d2470aaca467aa98ec32780fba3aa63c6ac2
 	https://github.com/sarnex/wine-d3d9-patches/archive/wine-d3d9-$_d3d9version.tar.gz
+        git+https://github.com/Firerat/wine-pba.git#branch=knobs_and_switches
 	harmony-fix.patch
 	30-win32-aliases.conf
 	wine-binfmt.conf
@@ -30,6 +31,7 @@ sha512sums=(
 	'SKIP'
 	'SKIP'
 	'SKIP'
+        'SKIP'
         'SKIP'
         'SKIP'
         'SKIP'
@@ -137,6 +139,10 @@ prepare() {
 
   patch -d $pkgname -Np1 < $_d3d9dir/staging-helper.patch
   patch -d $pkgname -Np1 < $_d3d9dir/wine-d3d9.patch
+
+  for patch in $(ls ./wine-pba/patches) ; do
+    patch -d $pkgname -Np1 < ./wine-pba/patches/$patch
+  done
 
   autoreconf -f "$pkgname"
 
