@@ -8,31 +8,29 @@
 # -GLSL hack fix for The Darkness II black textures
 
 pkgname=wine-bk
-pkgver=3.11
+pkgver=3.10
 pkgrel=1
 
 _pkgbasever=${pkgver/rc/-rc}
-
-_stagingversion="$pkgver"
-_d3d9version="3.11"
-
-_stagingdir="wine-staging-$_stagingversion"
+_d3d9version="3.10"
 _d3d9dir="wine-d3d9-patches-wine-d3d9-$_d3d9version"
 
 source=(
-	https://dl.winehq.org/wine/source/3.x/wine-$_pkgbasever.tar.xz
-	https://github.com/wine-staging/wine-staging/archive/v$_stagingversion.tar.gz
+	git+https://github.com/zfigura/wine.git#branch=esync
+	git+https://github.com/wine-staging/wine-staging.git#commit=91b1d2470aaca467aa98ec32780fba3aa63c6ac2
 	https://github.com/sarnex/wine-d3d9-patches/archive/wine-d3d9-$_d3d9version.tar.gz
 	harmony-fix.patch
 	30-win32-aliases.conf
 	wine-binfmt.conf
 	steam.patch
         glsl.patch
+        esync-staging-fixes.patch
 )
 sha512sums=(
 	'SKIP'
 	'SKIP'
 	'SKIP'
+        'SKIP'
         'SKIP'
         'SKIP'
         'SKIP'
@@ -119,7 +117,7 @@ install=wine.install
 
 prepare() {
   # Allow ccache to work
-  mv wine-$_pkgbasever $pkgname
+  mv wine $pkgname
 
   # https://bugs.winehq.org/show_bug.cgi?id=43530
   export CFLAGS="${CFLAGS/-fno-plt/}"
@@ -129,8 +127,13 @@ prepare() {
 
   patch -d $pkgname -Np1 < steam.patch
   patch -d $pkgname -Np1 < glsl.patch
+  patch -d wine-staging -Np1 < esync-staging-fixes.patch
 
-  $_stagingdir/patches/patchinstall.sh DESTDIR=$pkgname --all
+  ./wine-staging/patches/patchinstall.sh DESTDIR=$pkgname --all -W msvfw32-ICGetDisplayFormat \
+	-W server-Desktop_Refcount \
+	-W ws2_32-WSACleanup \
+	-W ws2_32-TransmitFile \
+	-W server-Pipe_ObjectName
 
   patch -d $pkgname -Np1 < $_d3d9dir/staging-helper.patch
   patch -d $pkgname -Np1 < $_d3d9dir/wine-d3d9.patch
