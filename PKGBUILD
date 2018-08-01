@@ -8,7 +8,7 @@
 # -GLSL hack fix for The Darkness II black textures
 
 pkgname=wine-bk
-pkgver=3.11
+pkgver=3.13
 pkgrel=1
 
 _pkgbasever=${pkgver/rc/-rc}
