@@ -14,7 +14,7 @@ pkgrel=1
 _pkgbasever=${pkgver/rc/-rc}
 
 _stagingversion="$pkgver"
-_d3d9version="3.11"
+_d3d9version="3.13"
 
 _stagingdir="wine-staging-$_stagingversion"
 _d3d9dir="wine-d3d9-patches-wine-d3d9-$_d3d9version"
