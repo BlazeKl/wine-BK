@@ -4,5 +4,5 @@ wine pkgbuild for arch based distros, for personal use for adding more patches a
 
 ## Patches :
 * Steam store patch
-* Glsl patch (mainly for The Darkness II)
+* Glsl patch (for The Darkness II black textures)
 * Gallium nine support
